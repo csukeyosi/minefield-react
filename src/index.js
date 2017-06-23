@@ -22,6 +22,7 @@ class Board extends React.Component {
       rows: rows,
       columns: columns,
       bombs:bombs,
+      hasRevealedBomb: false
     };
   }
 
@@ -51,15 +52,21 @@ class Board extends React.Component {
       return;
     }
 
-
-    const visibleSquares = this.state.visibleSquares.slice();
-
-    var x = i % this.state.rows;
-    var y = Math.floor(i / this.state.columns);
-    reveal(this.state.squares, visibleSquares, x, y, this.state.rows, this.state.columns);
+    var visibleSquares;
+    var isBomb = false;
+    if (this.state.squares[i] === '*') {
+      visibleSquares = Array(this.state.columns * this.state.rows).fill(true);
+      isBomb = true;
+    } else {
+      visibleSquares = this.state.visibleSquares.slice();
+      var x = i % this.state.rows;
+      var y = Math.floor(i / this.state.columns);
+      reveal(this.state.squares, visibleSquares, x, y, this.state.rows, this.state.columns);
+    }
 
      this.setState({
-      visibleSquares: visibleSquares
+      visibleSquares: visibleSquares,
+      hasRevealedBomb: isBomb
     });
   }
 
@@ -72,9 +79,15 @@ class Board extends React.Component {
       }
     }
 
+    var msg = "";
+    if (this.state.hasRevealedBomb) {
+      msg = "- Game over :("
+    }
+
     return (
       <div>
-        <h1>Bombs: {this.state.bombs}</h1>
+        <h1>Super Minefield!</h1>
+        <h2>Bombs: {this.state.bombs} {msg}</h2>
         {indents}
       </div>
     );
