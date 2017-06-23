@@ -15,7 +15,7 @@ class Board extends React.Component {
     super();
     var rows = 20;
     var columns = 20;
-    var bombs = 50;
+    var bombs = 60;
     this.state = {
       squares: generateMinefield(rows, columns, bombs),
       visibleSquares: Array(columns * rows).fill(false),
@@ -93,7 +93,7 @@ class Board extends React.Component {
     return (
       <div>
         <h1>Super Minefield!</h1>
-        <h2>Bombs: {this.state.bombs} {msg}</h2>
+        <h2>{this.state.bombs} Bombs {msg}</h2>
         {indents}
       </div>
     );
@@ -129,15 +129,15 @@ function generateMinefield(rows, columns, bombs) {
   var totalSquares = rows * columns;
   var minefield = Array(totalSquares).fill(0);
 
-  for (var i = 0; i < bombs; i++) {
-    minefield[i] = '*';
+  for (var b = 0; b < bombs; b++) {
+    minefield[b] = '*';
   }
 
   shuffleArray(minefield);
 
   var x, y;
   for (var i = 0; i < totalSquares; i++) {
-    if (minefield[i] != '*') {
+    if (minefield[i] !== '*') {
       x = i % rows;
       y = Math.floor(i / columns);
 
