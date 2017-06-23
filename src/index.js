@@ -19,6 +19,7 @@ class Board extends React.Component {
     this.state = {
       squares: generateMinefield(rows, columns, bombs),
       visibleSquares: Array(columns * rows).fill(false),
+      numberVisibleSquares: 0,
       rows: rows,
       columns: columns,
       bombs:bombs,
@@ -48,10 +49,12 @@ class Board extends React.Component {
 
 
    handleClick(i) {
-    if (this.state.visibleSquares[i]) {
+    if (this.state.visibleSquares[i]
+      || hasWon(this.state.numberVisibleSquares, this.state.columns, this.state.rows, this.state.bombs)) {
       return;
     }
 
+    var numberVisibleSquares = this.state.numberVisibleSquares;
     var visibleSquares;
     var isBomb = false;
     if (this.state.squares[i] === '*') {
@@ -61,12 +64,13 @@ class Board extends React.Component {
       visibleSquares = this.state.visibleSquares.slice();
       var x = i % this.state.rows;
       var y = Math.floor(i / this.state.columns);
-      reveal(this.state.squares, visibleSquares, x, y, this.state.rows, this.state.columns);
+      numberVisibleSquares += reveal(this.state.squares, visibleSquares, x, y, this.state.rows, this.state.columns);
     }
 
      this.setState({
       visibleSquares: visibleSquares,
-      hasRevealedBomb: isBomb
+      hasRevealedBomb: isBomb,
+      numberVisibleSquares: numberVisibleSquares
     });
   }
 
@@ -82,6 +86,8 @@ class Board extends React.Component {
     var msg = "";
     if (this.state.hasRevealedBomb) {
       msg = "- Game over :("
+    } else if (hasWon(this.state.numberVisibleSquares, this.state.columns, this.state.rows, this.state.bombs)) {
+      msg = "- You Won! :)"
     }
 
     return (
@@ -149,6 +155,9 @@ function generateMinefield(rows, columns, bombs) {
   return minefield;
 }
 
+function hasWon(numberVisibleSquares, columns, rows, bombs) {
+    return (numberVisibleSquares === (columns * rows) - bombs);
+}
 
 function check(array, x, y, rows, columns) {
   if (x < 0 || y < 0 || x >= columns || y >= rows) {
@@ -161,18 +170,21 @@ function check(array, x, y, rows, columns) {
 function reveal(squares, visibleSquares, x, y, rows, columns) {
   var index = (y * columns) + x;
   if (visibleSquares[index] || x < 0 || y < 0 || x >= columns || y >= rows) {
-    return;
+    return 0;
   }
 
+  var totalRevealed = 1;
   visibleSquares[index] = true;
 
   if (squares[index] === 0) {
     for (var dx = -1; dx <= 1; dx++) {
       for (var dy = -1; dy <= 1; dy++) {
-        reveal(squares, visibleSquares, x + dx, y + dy, rows, columns);
+        totalRevealed += reveal(squares, visibleSquares, x + dx, y + dy, rows, columns);
       }
     }
   }
+
+  return totalRevealed;
 }
 
 function shuffleArray(array) {
